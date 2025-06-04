@@ -3,7 +3,6 @@ import AOS from 'aos';
 import 'aos/dist/aos.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-// Helper function to extract YouTube video ID and construct thumbnail URL
 const getYoutubeThumbnailUrl = (url) => {
   if (!url) return null;
 
@@ -16,7 +15,6 @@ const getYoutubeThumbnailUrl = (url) => {
   }
 
   if (videoId) {
-    // You can choose different qualities: default.jpg, mqdefault.jpg, hqdefault.jpg, sddefault.jpg, maxresdefault.jpg
     return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
   }
   return null;
@@ -41,33 +39,30 @@ function AdminDashboard() {
 
     const savedCourses = JSON.parse(localStorage.getItem('courses')) || [];
 
-    // IMPORTANT FIX: Ensure all loaded courses have a 'lessons' array
     const initializedCourses = savedCourses.map(course => ({
       ...course,
-      lessons: course.lessons || [] // If 'lessons' exists, use it; otherwise, initialize as empty array
+      lessons: course.lessons || []
     }));
 
     setCourses(initializedCourses);
   }, []);
 
-  // Helper function to update courses in state and localStorage
   const updateCourses = useCallback((newCourses) => {
     setCourses(newCourses);
     localStorage.setItem('courses', JSON.stringify(newCourses));
   }, []);
 
-  // --- Course Management Handlers ---
   const handleAddCourse = () => {
     if (!courseForm.title || !courseForm.description || !courseForm.thumbnail) {
       alert('All course fields are required!');
       return;
     }
 
-    const newCourse = { ...courseForm, id: Date.now().toString(), lessons: [] }; // Ensure new courses have lessons array
+    const newCourse = { ...courseForm, id: Date.now().toString(), lessons: [] };
     const updatedCourses = [...courses, newCourse];
     updateCourses(updatedCourses);
-    setCourseForm({ title: '', description: '', thumbnail: '', status: 'draft' }); // Reset form
-    setShowAddCourseModal(false); // Close the modal
+    setCourseForm({ title: '', description: '', thumbnail: '', status: 'draft' });
+    setShowAddCourseModal(false);
   };
 
   const handleEditCourseSave = () => {
@@ -75,7 +70,7 @@ function AdminDashboard() {
       course.id === editingCourse.id ? editingCourse : course
     );
     updateCourses(updatedCourses);
-    setEditingCourse(null); // Close the edit modal
+    setEditingCourse(null);
   };
 
   const handleDeleteCourse = (id) => {
@@ -85,7 +80,6 @@ function AdminDashboard() {
     }
   };
 
-  // --- Lesson Management Handlers ---
   const handleAddLesson = () => {
     if (!lessonForm.title || !lessonForm.videoUrl || !lessonForm.content) {
       alert('All lesson fields are required!');
@@ -95,11 +89,10 @@ function AdminDashboard() {
     const newLesson = { ...lessonForm, id: Date.now().toString() };
     const updatedCourses = courses.map(course =>
       course.id === selectedCourseForLessons.id
-        ? { ...course, lessons: [...(course.lessons || []), newLesson] } // Ensure lessons array exists even if missing
+        ? { ...course, lessons: [...(course.lessons || []), newLesson] }
         : course
     );
     updateCourses(updatedCourses);
-    // Find the updated selectedCourseForLessons object from the new state
     setSelectedCourseForLessons(updatedCourses.find(c => c.id === selectedCourseForLessons.id));
     setLessonForm({ title: '', videoUrl: '', content: '' });
   };
@@ -109,7 +102,7 @@ function AdminDashboard() {
       if (course.id === selectedCourseForLessons.id) {
         return {
           ...course,
-          lessons: (course.lessons || []).map(lesson => // Ensure lessons array exists
+          lessons: (course.lessons || []).map(lesson =>
             lesson.id === editingLesson.id ? editingLesson : lesson
           )
         };
@@ -127,7 +120,7 @@ function AdminDashboard() {
         if (course.id === selectedCourseForLessons.id) {
           return {
             ...course,
-            lessons: (course.lessons || []).filter(lesson => lesson.id !== lessonId) // Ensure lessons array exists
+            lessons: (course.lessons || []).filter(lesson => lesson.id !== lessonId)
           };
         }
         return course;
@@ -137,7 +130,6 @@ function AdminDashboard() {
     }
   };
 
-  // Get thumbnail URL for preview in add/edit forms
   const currentLessonThumbnailUrl = getYoutubeThumbnailUrl(lessonForm.videoUrl);
   const editingLessonThumbnailUrl = editingLesson ? getYoutubeThumbnailUrl(editingLesson.videoUrl) : null;
 
@@ -152,7 +144,15 @@ function AdminDashboard() {
         }
         .form-icon-input .form-control,
         .form-icon-input .form-select {
-            padding-left: 2.5rem; /* Space for the icon */
+            padding-left: 2.5rem;
+            border-radius: 50px;
+            height: 50px;
+        }
+        .form-icon-input textarea.form-control {
+            border-radius: 1rem;
+            height: auto; /* Override fixed height for textarea */
+            padding-top: 0.75rem; /* Adjust padding for icon */
+            padding-bottom: 0.75rem;
         }
         .form-icon-input .input-icon {
             position: absolute;
@@ -160,18 +160,23 @@ function AdminDashboard() {
             top: 50%;
             transform: translateY(-50%);
             color: #6c757d;
-            z-index: 2; /* Ensure icon is above input */
+            font-size: 1.2rem;
+            z-index: 2;
+        }
+        .form-icon-input textarea.form-control + .input-icon {
+            top: 1.2rem; /* Align icon better with textarea */
+            transform: translateY(0);
         }
         .card {
             transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-            border: none; /* Remove default bootstrap card border */
+            border: none;
         }
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
         }
         .btn-fancy-add {
-            background: linear-gradient(45deg, #6B8E23, #A2B963); /* Olive green shades */
+            background: linear-gradient(45deg, #6B8E23, #A2B963);
             border: none;
             color: white;
             font-weight: 600;
@@ -183,10 +188,10 @@ function AdminDashboard() {
         .btn-fancy-add:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(107, 142, 35, 0.5);
-            color: white; /* Ensure text remains white on hover */
+            color: white;
         }
         .modal-content {
-            border-radius: 1rem !important; /* Larger border-radius for modals */
+            border-radius: 1rem !important;
         }
         .lesson-thumbnail-preview {
             width: 100px;
@@ -195,10 +200,10 @@ function AdminDashboard() {
             border-radius: 0.5rem;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             margin-right: 15px;
-            flex-shrink: 0; /* Prevent it from shrinking */
+            flex-shrink: 0;
         }
         .lesson-list-item-thumbnail {
-            width: 80px; /* Smaller thumbnail in list */
+            width: 80px;
             height: 45px;
             object-fit: cover;
             border-radius: 0.3rem;
@@ -209,7 +214,6 @@ function AdminDashboard() {
         `}
       </style>
       <div className="container py-5 text-center">
-        {/* Header and Add Course Button */}
         <div className="d-flex flex-column flex-md-row justify-content-between align-items-center mb-5" data-aos="fade-down">
           <h2 className="mb-3 mb-md-0 text-dark text-center text-md-start">
             <i className="fas fa-tools me-2 text-primary"></i>Admin Panel: Course & Lesson Manager
@@ -219,7 +223,6 @@ function AdminDashboard() {
           </button>
         </div>
 
-        {/* Course Cards Display */}
         <div className="row" data-aos="fade-up">
           {courses.length === 0 ? (
             <div className="col-12 text-center text-muted py-5">
@@ -235,7 +238,7 @@ function AdminDashboard() {
                     className="card-img-top"
                     style={{ height: '180px', objectFit: 'cover' }}
                     alt={course.title}
-                    onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/400x180?text=Course+Image'; }} // Fallback for broken images
+                    onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/400x180?text=Course+Image'; }}
                   />
                   <div className="card-body text-start d-flex flex-column">
                     <h5 className="card-title text-primary fw-bold mb-2">
@@ -252,7 +255,7 @@ function AdminDashboard() {
                       <div className="d-flex flex-wrap justify-content-center justify-content-sm-end">
                         <button
                           className="btn btn-outline-info btn-sm me-2 mb-2 mb-sm-0 rounded-pill px-3"
-                          onClick={() => setSelectedCourseForLessons(course)} // Open lesson manager
+                          onClick={() => setSelectedCourseForLessons(course)}
                         >
                           <i className="fas fa-list-ul me-1"></i> Lessons ({course.lessons ? course.lessons.length : 0})
                         </button>
@@ -277,7 +280,6 @@ function AdminDashboard() {
           )}
         </div>
 
-        {/* Add Course Modal */}
         {showAddCourseModal && (
           <div className="modal d-block bg-dark bg-opacity-50" tabIndex="-1" data-aos="zoom-in">
             <div className="modal-dialog modal-dialog-centered modal-lg">
@@ -340,7 +342,6 @@ function AdminDashboard() {
           </div>
         )}
 
-        {/* Edit Course Modal */}
         {editingCourse && (
           <div className="modal d-block bg-dark bg-opacity-50" tabIndex="-1" data-aos="zoom-in">
             <div className="modal-dialog modal-dialog-centered modal-lg">
@@ -400,10 +401,9 @@ function AdminDashboard() {
           </div>
         )}
 
-        {/* Lesson Manager Modal */}
         {selectedCourseForLessons && (
           <div className="modal d-block bg-dark bg-opacity-50" tabIndex="-1" data-aos="zoom-in">
-            <div className="modal-dialog modal-dialog-centered modal-xl"> {/* Larger modal for lessons */}
+            <div className="modal-dialog modal-dialog-centered modal-xl">
               <div className="modal-content rounded-4 p-4 shadow-lg">
                 <div className="modal-header border-0 pb-0">
                   <h5 className="modal-title text-success fw-bold">
@@ -411,15 +411,15 @@ function AdminDashboard() {
                   </h5>
                   <button type="button" className="btn-close" onClick={() => {
                     setSelectedCourseForLessons(null);
-                    setLessonForm({ title: '', videoUrl: '', content: '' }); // Reset lesson form
+                    setLessonForm({ title: '', videoUrl: '', content: '' });
                   }}></button>
                 </div>
                 <div className="modal-body pt-3">
-                  {/* Add Lesson Form */}
+
                   <div className="card shadow-sm mb-4 rounded-3 border-0" data-aos="fade-up">
                     <div className="card-body">
                       <h6 className="card-title text-secondary mb-3"><i className="fas fa-plus-circle me-2"></i>Add New Lesson</h6>
-                      <div className="row align-items-center"> {/* Added align-items-center for vertical alignment */}
+                      <div className="row align-items-center">
                         <div className="col-12 col-md-4 mb-3">
                           <div className="form-group form-icon-input">
                             <i className="fas fa-file-alt input-icon"></i>
@@ -432,13 +432,13 @@ function AdminDashboard() {
                             />
                           </div>
                         </div>
-                        <div className="col-12 col-md-5 mb-3"> {/* Increased width for video URL + thumbnail preview */}
+                        <div className="col-12 col-md-5 mb-3">
                           <div className="form-group form-icon-input d-flex align-items-center">
                             <i className="fas fa-video input-icon"></i>
                             <input
                               type="text"
                               placeholder="Video URL (e.g., YouTube link)"
-                              className="form-control rounded-pill me-2" // Added margin-right
+                              className="form-control rounded-pill me-2"
                               value={lessonForm.videoUrl}
                               onChange={(e) => setLessonForm({ ...lessonForm, videoUrl: e.target.value })}
                             />
@@ -447,7 +447,7 @@ function AdminDashboard() {
                                   src={currentLessonThumbnailUrl}
                                   alt="YouTube Thumbnail"
                                   className="lesson-thumbnail-preview"
-                                  onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/100x60?text=Invalid+URL'; }} // Fallback
+                                  onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/100x60?text=Invalid+URL'; }}
                                 />
                             )}
                           </div>
@@ -473,7 +473,6 @@ function AdminDashboard() {
                     </div>
                   </div>
 
-                  {/* Lessons List */}
                   <h6 className="text-secondary mb-3 mt-4"><i className="fas fa-list-ol me-2"></i>Existing Lessons</h6>
                   {selectedCourseForLessons.lessons && selectedCourseForLessons.lessons.length === 0 ? (
                     <div className="text-center text-muted py-3">
@@ -484,13 +483,13 @@ function AdminDashboard() {
                     <ul className="list-group rounded-3 shadow-sm">
                       {selectedCourseForLessons.lessons && selectedCourseForLessons.lessons.map((lesson, index) => (
                         <li className="list-group-item d-flex flex-column flex-sm-row justify-content-between align-items-sm-center py-3" key={lesson.id} data-aos="fade-up" data-aos-delay={index * 50}>
-                          <div className="d-flex align-items-center text-start flex-grow-1 mb-2 mb-sm-0"> {/* Added d-flex and align-items-center */}
+                          <div className="d-flex align-items-center text-start flex-grow-1 mb-2 mb-sm-0">
                             {getYoutubeThumbnailUrl(lesson.videoUrl) && (
                               <img
                                 src={getYoutubeThumbnailUrl(lesson.videoUrl)}
                                 alt="YouTube Thumbnail"
                                 className="lesson-list-item-thumbnail"
-                                onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/80x45?text=No+Thumb'; }} // Fallback
+                                onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/80x45?text=No+Thumb'; }}
                               />
                             )}
                             <div>
@@ -527,7 +526,7 @@ function AdminDashboard() {
                 <div className="modal-footer border-0 pt-0">
                   <button className="btn btn-secondary rounded-pill px-4" onClick={() => {
                     setSelectedCourseForLessons(null);
-                    setLessonForm({ title: '', videoUrl: '', content: '' }); // Reset lesson form on close
+                    setLessonForm({ title: '', videoUrl: '', content: '' });
                   }}>
                     <i className="fas fa-times-circle me-1"></i> Close
                   </button>
@@ -537,10 +536,9 @@ function AdminDashboard() {
           </div>
         )}
 
-        {/* Edit Lesson Modal */}
         {editingLesson && (
           <div className="modal d-block bg-dark bg-opacity-50" tabIndex="-1" data-aos="zoom-in">
-            <div className="modal-dialog modal-dialog-centered modal-lg"> {/* Adjusted size for edit modal */}
+            <div className="modal-dialog modal-dialog-centered modal-lg">
               <div className="modal-content rounded-4 p-4 shadow-lg">
                 <div className="modal-header border-0 pb-0">
                   <h5 className="modal-title text-primary fw-bold"><i className="fas fa-pen-square me-2"></i>Edit Lesson</h5>
@@ -556,11 +554,11 @@ function AdminDashboard() {
                       onChange={(e) => setEditingLesson({ ...editingLesson, title: e.target.value })}
                     />
                   </div>
-                  <div className="form-group mb-3 form-icon-input d-flex align-items-center"> {/* Added d-flex and align-items-center */}
+                  <div className="form-group mb-3 form-icon-input d-flex align-items-center">
                     <i className="fas fa-video input-icon"></i>
                     <input
                       type="text"
-                      className="form-control rounded-pill me-2" // Added margin-right
+                      className="form-control rounded-pill me-2"
                       value={editingLesson.videoUrl}
                       onChange={(e) => setEditingLesson({ ...editingLesson, videoUrl: e.target.value })}
                     />
@@ -569,7 +567,7 @@ function AdminDashboard() {
                           src={editingLessonThumbnailUrl}
                           alt="YouTube Thumbnail"
                           className="lesson-thumbnail-preview"
-                          onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/100x60?text=Invalid+URL'; }} // Fallback
+                          onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/100x60?text=Invalid+URL'; }}
                         />
                     )}
                   </div>

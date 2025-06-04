@@ -3,7 +3,6 @@ import AOS from 'aos';
 import 'aos/dist/aos.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-// Helper function to extract YouTube video ID and construct thumbnail URL
 const getYoutubeThumbnailUrl = (url) => {
   if (!url) return null;
 
@@ -24,8 +23,8 @@ const getYoutubeThumbnailUrl = (url) => {
 function UserDashboard() {
   const [courses, setCourses] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCourse, setSelectedCourse] = useState(null); // Course whose lessons are being viewed
-  const [completedLessons, setCompletedLessons] = useState({}); // Stores { courseId: [lessonId1, lessonId2], ... }
+  const [selectedCourse, setSelectedCourse] = useState(null); 
+  const [completedLessons, setCompletedLessons] = useState({}); 
 
   useEffect(() => {
     AOS.init({
@@ -34,27 +33,22 @@ function UserDashboard() {
       mirror: false,
     });
 
-    // Load courses from localStorage
     const savedCourses = JSON.parse(localStorage.getItem('courses')) || [];
-    // Ensure all loaded courses have a 'lessons' array for consistency
     const initializedCourses = savedCourses.map(course => ({
       ...course,
       lessons: course.lessons || []
     }));
     setCourses(initializedCourses);
 
-    // Load completed lessons from localStorage
     const savedCompletedLessons = JSON.parse(localStorage.getItem('completedLessons')) || {};
     setCompletedLessons(savedCompletedLessons);
   }, []);
 
-  // Update completed lessons in localStorage
   const updateCompletedLessons = useCallback((newCompletedLessons) => {
     setCompletedLessons(newCompletedLessons);
     localStorage.setItem('completedLessons', JSON.stringify(newCompletedLessons));
   }, []);
 
-  // Filter courses based on search term and status
   const filteredCourses = useMemo(() => {
     return courses.filter(course =>
       course.status === 'published' &&
@@ -62,25 +56,23 @@ function UserDashboard() {
     );
   }, [courses, searchTerm]);
 
-  // Handle marking a lesson as done/undone
   const handleToggleLessonComplete = (courseId, lessonId) => {
     setCompletedLessons(prevCompleted => {
       const courseCompletedLessons = new Set(prevCompleted[courseId] || []);
       if (courseCompletedLessons.has(lessonId)) {
-        courseCompletedLessons.delete(lessonId); // Mark as undone
+        courseCompletedLessons.delete(lessonId); 
       } else {
-        courseCompletedLessons.add(lessonId); // Mark as done
+        courseCompletedLessons.add(lessonId); 
       }
       const newCompleted = {
         ...prevCompleted,
         [courseId]: Array.from(courseCompletedLessons)
       };
-      updateCompletedLessons(newCompleted); // Save to localStorage
+      updateCompletedLessons(newCompleted); 
       return newCompleted;
     });
   };
 
-  // Check if a lesson is completed
   const isLessonCompleted = (courseId, lessonId) => {
     return completedLessons[courseId]?.includes(lessonId);
   };
@@ -94,10 +86,11 @@ function UserDashboard() {
             position: relative;
         }
         .search-input-container .form-control {
-            padding-left: 3rem; /* Space for the icon */
+            padding-left: 3rem;
             border-radius: 50px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
             border: none;
+            height: 50px;
         }
         .search-input-container .input-icon {
             position: absolute;
@@ -111,7 +104,7 @@ function UserDashboard() {
         .card {
             transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
             border: none;
-            cursor: pointer; /* Indicate clickable cards */
+            cursor: pointer;
         }
         .card:hover {
             transform: translateY(-5px);
@@ -142,11 +135,11 @@ function UserDashboard() {
             flex-shrink: 0;
         }
         .lesson-completed {
-            background-color: #E6F7ED !important; /* Light green */
-            border-left: 5px solid #28a745; /* Green border */
+            background-color: #E6F7ED !important;
+            border-left: 5px solid #28a745;
         }
         .lesson-checkbox {
-            transform: scale(1.3); /* Make checkbox larger */
+            transform: scale(1.3);
             cursor: pointer;
         }
         .modal-content {
@@ -179,7 +172,6 @@ function UserDashboard() {
           </div>
         </div>
 
-        {/* Course Cards Display */}
         <div className="row" data-aos="fade-up">
           {filteredCourses.length === 0 ? (
             <div className="col-12 text-center text-muted py-5">
